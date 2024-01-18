@@ -1,29 +1,39 @@
 import { useEffect, useState } from "react";
 import { InputField } from "../input/InputField";
 import style from "./LoginForm.module.scss";
+
 export const LoginForm = ({ setUserData }) => {
   const [isSignIn, setIsSignIn] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState("");
 
   const submitAction = (e) => {
     e.preventDefault();
-    console.log(e.target.email.value);
-    console.log(e.target.password.value);
+    console.log("Email:", e.target.email.value);
+    console.log("Password:", e.target.password.value);
 
     let url = isSignIn
       ? "http://localhost:8081/sign-in"
       : "http://localhost:8081/sign-up";
+    console.log("request url:", url);
+
     let body = new URLSearchParams();
-    !isSignIn && body.append("name", e.target.name.value);
+    if (!isSignIn) {
+      body.append("name", e.target.name.value);
+      console.log("Name:", e.target.name.value);
+    }
     body.append("email", e.target.email.value);
     body.append("password", e.target.password.value);
 
     fetch(url, { method: "POST", body: body })
-      .then((response) => response.json())
-      .then((data) =>
-        !data.accessToken ? setFeedbackMsg(data) : setUserData(data)
-      )
-      .catch((err) => console.log(err));
+      .then((response) => {
+        console.log("Response status:", response.status);
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Response data:", data);
+        !data.accessToken ? setFeedbackMsg(data) : setUserData(data);
+      })
+      .catch((err) => console.error("Fetch error:", err));
   };
 
   useEffect(() => {
@@ -50,16 +60,16 @@ export const LoginForm = ({ setUserData }) => {
         <InputField
           type="email"
           name="email"
-          placeholder="enter email"
+          placeholder="Enter email"
           label={true}
         />
         <InputField
           type="password"
           name="password"
-          placeholder="enter password"
+          placeholder="Enter password"
           label={true}
         />
-        <InputField type="button" name="Submit" />
+        <InputField type="submit" value="Submit" />
       </form>
     </div>
   );
